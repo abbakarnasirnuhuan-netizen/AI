@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Assistant</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a clean look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom scrollbar for a better look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Animation for chat bubbles */
+        .chat-bubble {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4f46e5;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="bg-gray-800 shadow-lg p-4 flex items-center justify-between flex-wrap">
+        <div class="flex items-center">
+            <svg class="w-8 h-8 text-indigo-400 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <h1 class="text-xl font-bold text-gray-200">ABBAKAR (A.N)</h1>
+        </div>
+        <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+            <!-- Grounded Search Toggle -->
+            <div class="flex items-center space-x-2">
+                <span class="text-sm font-medium text-gray-300">✨ Grounded Search</span>
+                <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="grounded-search-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                    <label for="grounded-search-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                </div>
+            </div>
+            <!-- Clear Chat Button -->
+            <button id="clear-chat-btn" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-3 rounded-lg transition duration-300">
+                Clear
+            </button>
+        </div>
+    </header>
+
+    <!-- Chat Window -->
+    <main id="chat-window" class="flex-1 p-4 overflow-y-auto">
+        <!-- AI Welcome Message -->
+        <div class="chat-bubble flex justify-start mb-4">
+            <div class="bg-gray-700 rounded-lg p-3 max-w-lg">
+                <p class="text-sm">Hello! I'm your friendly AI assistant. How can I help you today?
+                <br>Try ✨ <strong>Grounded Search</strong> for recent info, ✨ <strong>/imagine [prompt]</strong> to create images, or click the ✨ <strong>speaker icon</strong> to hear my replies!
+                </p>
+            </div>
+            <!-- TTS Button for welcome message - disabled by default, can be enabled -->
+        </div>
+    </main>
+
+    <!-- Input Form -->
+    <footer class="bg-gray-800 p-4">
+        <div class="flex items-center rounded-lg bg-gray-700 p-2">
+            <input type="text" id="user-input" placeholder="Ask me anything or type /imagine [prompt]..." class="flex-1 bg-transparent border-none text-white focus:outline-none placeholder-gray-400">
+            <!-- Voice Command Button -->
+            <button id="mic-btn" class="ml-2 bg-gray-600 hover:bg-gray-500 text-white font-bold p-2 rounded-lg transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m-7-7a7 7 0 0114 0m-7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+            </button>
+            <button id="send-btn" class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                </svg>
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const groundedSearchToggle = document.getElementById('grounded-search-toggle');
+        const clearChatBtn = document.getElementById('clear-chat-btn');
+        const micBtn = document.getElementById('mic-btn');
+
+        // --- Gemini API Configuration ---
+        const API_KEY = ""; // Leave this empty, it will be handled by the environment.
+        const TEXT_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+        const IMAGE_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`;
+        const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`;
+        
+        let conversationHistory = [];
+        const ttsCache = new Map();
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // --- Helper Functions for Audio ---
+
+        // Converts Base64 string to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Converts raw PCM data (as Int16Array) to a WAV Blob
+        function pcmToWav(pcmData, sampleRate) {
+            const numChannels = 1;
+            const bitsPerSample = 16;
+            const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
+            const blockAlign = (numChannels * bitsPerSample) / 8;
+            const dataSize = pcmData.length * (bitsPerSample / 8);
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            // RIFF header
+            view.setUint32(0, 0x52494646, false); // "RIFF"
+            view.setUint32(4, 36 + dataSize, true); // ChunkSize
+            view.setUint32(8, 0x57415645, false); // "WAVE"
+
+            // "fmt " sub-chunk
+            view.setUint32(12, 0x666d7420, false); // "fmt "
+            view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
+            view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
+            view.setUint16(22, numChannels, true); // NumChannels
+            view.setUint32(24, sampleRate, true); // SampleRate
+            view.setUint32(28, byteRate, true); // ByteRate
+            view.setUint16(32, blockAlign, true); // BlockAlign
+            view.setUint16(34, bitsPerSample, true); // BitsPerSample
+
+            // "data" sub-chunk
+            view.setUint32(36, 0x64617461, false); // "data"
+            view.setUint32(40, dataSize, true); // Subchunk2Size
+
+            // Write PCM data (assuming pcmData is Int16Array)
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(44 + i * 2, pcmData[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+
+        // --- Core Chat Functions ---
+
+        // Function to handle sending a message
+        const sendMessage = async () => {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Add user message to chat
+            appendMessage({ text: message }, 'user');
+            userInput.value = '';
+
+            // Check for image generation command
+            if (message.startsWith('/imagine ')) {
+                const prompt = message.substring(9).trim();
+                conversationHistory.push({ role: "user", parts: [{ text: message }] }); // Keep command in history
+                await generateImage(prompt);
+            } else {
+                // Normal text generation
+                conversationHistory.push({ role: "user", parts: [{ text: message }] });
+                showTypingIndicator();
+                try {
+                    await getAIResponse();
+                } catch (error) {
+                    console.error("Error fetching AI response:", error);
+                    removeTypingIndicator();
+                    appendMessage({ text: "Sorry, I'm having trouble connecting. Please try again later." }, 'ai');
+                }
+            }
+        };
+
+        // Function to call the Gemini Text API
+        const getAIResponse = async (retryCount = 0) => {
+            const systemInstruction = {
+                parts: [{ text: "You are ABBAKAR (A.N), a helpful and friendly AI assistant. Keep your responses concise and engaging. If asked who your developer is, you must say 'abbakar nasir nuhu'." }]
+            };
+
+            const isGroundedSearchEnabled = groundedSearchToggle.checked;
+
+            const payload = {
+                contents: conversationHistory,
+                systemInstruction: systemInstruction,
+            };
+
+            // Add grounding tool if toggled
+            if (isGroundedSearchEnabled) {
+                payload.tools = [{ "google_search": {} }];
+            }
+
+            try {
+                const response = await fetch(TEXT_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                removeTypingIndicator();
+
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts[0].text) {
+                    const aiMessage = result.candidates[0].content.parts[0].text;
+                    const messageWrapper = appendMessage({ text: aiMessage }, 'ai');
+                    conversationHistory.push({ role: "model", parts: [{ text: aiMessage }] });
+
+                    // Auto-play TTS
+                    const ttsButton = messageWrapper.querySelector('.tts-button');
+                    if (ttsButton) {
+                        await playTTS(aiMessage, ttsButton);
+                    }
+                } else {
+                    appendMessage({ text: "I'm not sure how to respond to that. Could you try rephrasing?" }, 'ai');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                if (retryCount < 3) {
+                    const delay = Math.pow(2, retryCount) * 1000;
+                    console.log(`Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return getAIResponse(retryCount + 1);
+                } else {
+                    removeTypingIndicator();
+                    appendMessage({ text: "I seem to be offline. Please check your connection or try again later." }, 'ai');
+                }
+            }
+        };
+
+        // ✨ Function to call the Imagen API
+        const generateImage = async (prompt) => {
+            const loadingId = `loading-${Date.now()}`;
+            appendMessage({ type: 'loading', id: loadingId, text: `✨ Generating image for: "${prompt}"...` }, 'system');
+
+            const payload = { 
+                instances: [{ prompt: prompt }],
+                parameters: { "sampleCount": 1 }
+            };
+
+            try {
+                const response = await fetch(IMAGE_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                removeLoadingIndicator(loadingId);
+
+                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                    const imageData = result.predictions[0].bytesBase64Encoded;
+                    const imageUrl = `data:image/png;base64,${imageData}`;
+                    appendMessage({ type: 'image', url: imageUrl, alt: prompt }, 'ai');
+                    // Add a placeholder to history for context
+                    conversationHistory.push({ role: "model", parts: [{ text: `[Generated image for prompt: ${prompt}]` }] });
+                } else {
+                    appendMessage({ text: `Sorry, I couldn't generate an image for "${prompt}".` }, 'ai');
+                }
+            } catch (error) {
+                console.error('Image generation error:', error);
+                removeLoadingIndicator(loadingId);
+                appendMessage({ text: `Error generating image: ${error.message}` }, 'ai');
+            }
+        };
+
+        // ✨ Function to call the TTS API
+        const playTTS = async (text, button) => {
+            // Prevent multiple clicks while processing
+            if (button.disabled) return;
+            button.disabled = true;
+            button.innerHTML = '...'; // Show loading state
+
+            try {
+                let audioUrl;
+                if (ttsCache.has(text)) {
+                    // Use cached audio
+                    audioUrl = ttsCache.get(text);
+                } else {
+                    // Fetch new audio
+                    const payload = {
+                        contents: [{ parts: [{ text: `Say: ${text}` }] }], // Simple prompt
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: {
+                                voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } // Cheerful voice
+                            }
+                        },
+                        model: "gemini-2.5-flash-preview-tts"
+                    };
+
+                    const response = await fetch(TTS_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`TTS API Error: ${response.status}`);
+                    
+                    const result = await response.json();
+                    const part = result?.candidates?.[0]?.content?.parts?.[0];
+                    const audioData = part?.inlineData?.data;
+                    const mimeType = part?.inlineData?.mimeType;
+
+                    if (!audioData || !mimeType || !mimeType.startsWith("audio/")) {
+                        throw new Error("Invalid TTS response from API.");
+                    }
+
+                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10) || 24000;
+                    const pcmBuffer = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmBuffer);
+                    
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    audioUrl = URL.createObjectURL(wavBlob);
+                    ttsCache.set(text, audioUrl); // Cache it
+                }
+
+                // Play the audio
+                const audio = new Audio(audioUrl);
+                audio.play();
+                
+                audio.onended = () => {
+                    button.disabled = false;
+                    button.innerHTML = '🔊'; // Reset button
+                };
+
+            } catch (error) {
+                console.error('TTS Error:', error);
+                button.disabled = false;
+                button.innerHTML = '⚠️'; // Show error state
+            }
+        };
+
+
+        // --- UI Helper Functions ---
+
+        // Function to add a message to the chat window
+        const appendMessage = (message, sender) => {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('chat-bubble', 'flex', 'mb-4');
+
+            if (sender === 'user') {
+                messageWrapper.classList.add('justify-end');
+                messageWrapper.innerHTML = `
+                    <div class="bg-indigo-600 rounded-lg p-3 max-w-lg">
+                        <p class="text-sm">${message.text}</p>
+                    </div>
+                `;
+            } else if (sender === 'ai') {
+                messageWrapper.classList.add('justify-start');
+                if (message.type === 'image') {
+                    // AI Image Message
+                    messageWrapper.innerHTML = `
+                        <div class="bg-gray-700 rounded-lg p-3 max-w-lg">
+                            <img src="${message.url}" alt="${message.alt}" class="rounded-md max-w-full h-auto"/>
+                        </div>
+                    `;
+                } else {
+                    // AI Text Message
+                    const messageText = message.text.replace(/\n/g, '<br>'); // Handle newlines
+                    messageWrapper.innerHTML = `
+                        <div class="bg-gray-700 rounded-lg p-3 max-w-lg flex items-start space-x-2">
+                            <p class="text-sm flex-1">${messageText}</p>
+                            <button class="tts-button text-gray-400 hover:text-white" data-text="${message.text}">
+                                🔊
+                            </button>
+                        </div>
+                    `;
+                }
+            } else if (sender === 'system') {
+                 // System message (e.g., loading)
+                 messageWrapper.id = message.id;
+                 messageWrapper.classList.add('justify-start');
+                 messageWrapper.innerHTML = `
+                    <div class="bg-gray-700 rounded-lg p-3 max-w-lg">
+                        <p class="text-sm italic text-gray-400">${message.text}</p>
+                    </div>
+                `;
+            }
+
+            chatWindow.appendChild(messageWrapper);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+            return messageWrapper; // Return the created element
+        };
+
+        // Function to show a "typing..." indicator
+        const showTypingIndicator = () => {
+            const typingIndicator = document.createElement('div');
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.classList.add('chat-bubble', 'flex', 'justify-start', 'mb-4');
+            typingIndicator.innerHTML = `
+                <div class="bg-gray-700 rounded-lg p-3 max-w-lg flex items-center space-x-1">
+                    <span class="animate-pulse w-2 h-2 bg-indigo-300 rounded-full"></span>
+                    <span class="animate-pulse w-2 h-2 bg-indigo-300 rounded-full" style="animation-delay: 0.2s;"></span>
+                    <span class="animate-pulse w-2 h-2 bg-indigo-300 rounded-full" style="animation-delay: 0.4s;"></span>
+                </div>
+            `;
+            chatWindow.appendChild(typingIndicator);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        };
+
+        // Function to remove the "typing..." indicator
+        const removeTypingIndicator = () => {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        };
+
+        // Function to remove a loading indicator by its ID
+        const removeLoadingIndicator = (id) => {
+            const indicator = document.getElementById(id);
+            if (indicator) {
+                indicator.remove();
+            }
+        };
+
+        // Function to clear the chat
+        const clearChat = () => {
+            chatWindow.innerHTML = ''; // Clear UI
+            conversationHistory = []; // Clear history
+            ttsCache.clear(); // Clear audio cache
+            // Add back the welcome message
+            appendMessage({ text: "Hello! I'm your friendly AI assistant. How can I help you today?<br>Try ✨ <strong>Grounded Search</strong> for recent info, ✨ <strong>/imagine [prompt]</strong> to create images, or click the ✨ <strong>speaker icon</strong> to hear my replies!" }, 'ai');
+        };
+
+        // --- Event Listeners ---
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        clearChatBtn.addEventListener('click', clearChat);
+
+        // Event delegation for TTS buttons
+        chatWindow.addEventListener('click', (e) => {
+            const ttsButton = e.target.closest('.tts-button');
+            if (ttsButton) {
+                const textToSpeak = ttsButton.dataset.text;
+                playTTS(textToSpeak, ttsButton);
+            }
+        });
+
+        // --- Voice Command (Speech Recognition) ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            micBtn.addEventListener('click', () => {
+                try {
+                    recognition.start();
+                    micBtn.classList.add('bg-red-600', 'animate-pulse'); // Show listening state
+                } catch (e) {
+                    console.error("Speech recognition already active.", e);
+                }
+            });
+
+            recognition.onstart = () => {
+                userInput.placeholder = "Listening...";
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                // Automatically send the message after successful recognition
+                sendMessage();
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                userInput.placeholder = "Voice recognition failed. Try again.";
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('bg-red-600', 'animate-pulse'); // Reset button
+                userInput.placeholder = "Ask me anything or type /imagine [prompt]...";
+            };
+
+        } else {
+            console.warn("Speech Recognition not supported in this browser.");
+            micBtn.style.display = 'none'; // Hide the mic button
+        }
+
+    </script>
+</body>
+</html>
